@@ -1,4 +1,4 @@
-# AccessGranted [![Build Status](https://travis-ci.org/chaps-io/access-granted.svg?branch=master)](https://travis-ci.org/chaps-io/access-granted) [![Code Climate](https://codeclimate.com/github/pokonski/access-granted.png)](https://codeclimate.com/github/pokonski/access-granted)
+# AccessGranted [![Build Status](https://travis-ci.org/simple-finance/access-granted.svg?branch=master)](https://travis-ci.org/chaps-io/access-granted) [![Code Climate](https://codeclimate.com/github/simple-finance/access-granted.png)](https://codeclimate.com/github/simple-finance/access-granted)
 
 ## [![](http://i.imgur.com/ya8Wnyl.png)](https://chaps.io) proudly made by [Chaps](https://chaps.io)
 
@@ -183,6 +183,11 @@ class PostsController
     authorize! :create, Post
     # (...)
   end
+
+  def edit
+    authorize_with_path! :edit, Post, dashboard_index_path, 'You are not authorized!'
+    # (...)
+  end
 end
 ```
 
@@ -193,6 +198,18 @@ You can rescue from it using `rescue_from`:
 class ApplicationController < ActionController::Base
   rescue_from "AccessGranted::AccessDenied" do |exception|
     redirect_to root_path, alert: "You don't have permissions to access this page."
+  end
+end
+```
+
+`authorize_with_path!` throws an exception when current user doesn't have a given permission 
+plus it allows you to define the desired redirect path and optionally an alert message.
+You can rescue from it using `rescue_from`:
+
+```ruby
+class ApplicationController < ActionController::Base
+  rescue_from "AccessGranted::AccessDeniedWithPath" do |exception|
+    redirect_to exception.path, alert: exception.alert
   end
 end
 ```

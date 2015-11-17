@@ -44,5 +44,13 @@ module AccessGranted
       end
       subject
     end
+
+    def authorize_with_path!(action, subject, path = nil, message = nil)
+      if cannot?(action, subject)
+        raise AccessDeniedWithPath.new(path, message)
+      end
+      subject
+    end
+
   end
 end

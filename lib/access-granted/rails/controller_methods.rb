@@ -20,6 +20,10 @@ module AccessGranted
       def authorize!(*args)
         current_policy.authorize!(*args)
       end
+
+      def authorize_with_path!(*args)
+        current_policy.authorize_with_path!(*args)
+      end
     end
   end
 end
