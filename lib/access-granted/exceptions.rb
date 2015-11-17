@@ -16,8 +16,9 @@ module AccessGranted
 
     attr_reader :path, :message
 
-    def initialize(path = '/', message = "You don't have permissions to access this page.")
-      @path, @message = path, message
+    def initialize(path = nil, message = nil)
+      @path    = path || '/'
+      @message = message || "You don't have permissions to access this page."
     end
 
   end
