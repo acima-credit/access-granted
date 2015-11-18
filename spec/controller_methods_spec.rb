@@ -46,6 +46,8 @@ describe AccessGranted::Rails::ControllerMethods do
         expect { @controller.authorize_with_path!(:read, String, '/hello', 'some_error') }.to raise_error(AccessGranted::AccessDeniedWithPath) do |e|
           expect(e.path).to eq '/hello'
           expect(e.message).to eq 'some_error'
+          expect(e.action).to eq :read
+          expect(e.subject).to eq String
         end
       end
     end

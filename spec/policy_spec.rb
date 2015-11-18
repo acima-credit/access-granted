@@ -139,6 +139,15 @@ describe AccessGranted::Policy do
         expect { klass.new(@member).authorize!(:create, Integer) }.to raise_error AccessGranted::AccessDenied
       end
 
+      it 'raises AccessDeniedWithPath if action is not allowed' do
+        expect { klass.new(@member).authorize_with_path!(:create, Integer, '/hola', 'an_error') }.to raise_error(AccessGranted::AccessDenied) do |e|
+          expect(e.path).to eq '/hola'
+          expect(e.message).to eq 'an_error'
+          expect(e.action).to eq :create
+          expect(e.subject).to eq Integer
+        end
+      end
+
       it 'returns the subject if allowed' do
         expect(klass.new(@member).authorize!(:create, String)).to equal String
       end

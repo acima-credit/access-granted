@@ -14,11 +14,13 @@ module AccessGranted
 
   class AccessDeniedWithPath < AccessDenied
 
-    attr_reader :path, :message
+    attr_reader :path, :message, :action, :subject
 
-    def initialize(path = nil, message = nil)
+    def initialize(path = nil, message = nil, action = nil, subject = nil)
       @path    = path || '/'
       @message = message || "You don't have permissions to access this page."
+      @action  = action
+      @subject = subject
     end
 
   end
