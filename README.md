@@ -230,6 +230,12 @@ class UsersController
     if can? :make_moderator, @user
       @user.moderator = params[:user][:moderator]
     end
+    
+    # you can also check for multiple actions
+    
+    if can? [:view_all_users, :view_some_users], @user
+      @users = UserList.new(for_user: @user)
+    end
 
     # (...)
   end
@@ -245,6 +251,10 @@ You can hide any part of the page from users without permissions like this:
 # app/views/categories/index.html.erb
 
 <% if can? :create, Category %>
+  <%= link_to "Create new category", new_category_path %>
+<% end %>
+
+<% if can? [:view_all_users, :view_some_users], User %>
   <%= link_to "Create new category", new_category_path %>
 <% end %>
 ```

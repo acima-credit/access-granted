@@ -1,7 +1,7 @@
 require 'rubygems'
 require 'bundler/setup'
 
-if ENV["COV"]
+if ENV['COV']
   require 'simplecov'
   SimpleCov.start
 end

@@ -104,6 +104,52 @@ describe AccessGranted::Policy do
       expect(klass.new(@member).can?(:vague_action)).to eq(true)
     end
 
+    context 'with multiple actions' do
+      it 'checks all actions in one role until conditions are met' do
+        user_post = FakePost.new(@member.id)
+
+        klass = Class.new do
+          include AccessGranted::Policy
+
+          def configure
+            role :member do
+              can :read, FakePost
+              can :comment, FakePost
+            end
+          end
+        end
+
+        expect(klass.new(@member).can?([:comment, :read], user_post)).to eq(true)
+        expect(klass.new(@member).can?([:write, :comment], user_post)).to eq(true)
+        expect(klass.new(@member).can?([:read, :write], user_post)).to eq(true)
+        expect(klass.new(@member).cannot?([:write, :moderate], user_post)).to eq(true)
+      end
+      it 'checks all actions in all roles until conditions are met' do
+        user_post = FakePost.new(@member.id)
+
+        klass = Class.new do
+          include AccessGranted::Policy
+
+          def configure
+            role :administrator, { is_admin: true } do
+              can :read, FakePost
+              can :moderate, FakePost
+            end
+
+            role :member do
+              can :read, FakePost
+              can :comment, FakePost
+            end
+          end
+        end
+
+        expect(klass.new(@member).can?([:comment, :read], user_post)).to eq(true)
+        expect(klass.new(@member).can?([:comment, :like], user_post)).to eq(true)
+        expect(klass.new(@member).can?([:like, :read], user_post)).to eq(true)
+        expect(klass.new(@member).cannot?([:write, :moderate], user_post)).to eq(true)
+      end
+    end
+
     describe '#cannot' do
       it 'forbids action when used in superior role' do
         klass = Class.new do
