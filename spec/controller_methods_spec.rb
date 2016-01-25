@@ -1,6 +1,15 @@
 require 'spec_helper'
 
 describe AccessGranted::Rails::ControllerMethods do
+
+  class StringDecorator
+    attr_reader :object
+
+    def initialize(string)
+      @object = string
+    end
+  end
+
   before(:each) do
     @current_user     = double('User')
     @controller_class = Class.new
@@ -24,6 +33,22 @@ describe AccessGranted::Rails::ControllerMethods do
       expect(@controller.cannot?([:read, :understand], String)).to eq(true)
     end
   end
+
+  context 'removes decorations on arguments' do
+    before(:each) do
+      @string = 'hello'
+      @decorated = StringDecorator.new @string
+      expect(@controller.current_policy).to receive(:can?).with(:read, @string)
+    end
+    it 'when a decorated object is received' do
+      @controller.can?(:read, @decorated)
+    end
+    it 'and leaves simple arguments alone' do
+      @controller.can?(:read, @string)
+    end
+  end
+
+  context
 
   describe '#authorize!' do
     context 'with a single action' do
