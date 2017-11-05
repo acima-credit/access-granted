@@ -1,10 +1,12 @@
 module AccessGranted
   module Policy
-    attr_accessor :roles
+    attr_accessor :roles, :cache
+    attr_reader :user
 
-    def initialize(user)
-      @user  = user
-      @roles = []
+    def initialize(user, cache_enabled = true)
+      @user          = user
+      @roles         = []
+      @cache         = {}
       configure
     end
 
@@ -28,12 +30,28 @@ module AccessGranted
     def can?(action, subject = nil)
       return action.any? { |x| can? x, subject } if action.is_a?(Array)
 
-      roles.each do |role|
-        next unless role.applies_to?(@user)
-        permission = role.find_permission(action, subject)
-        return permission.granted if permission
+      cache[action] ||= {}
+
+      if cache[action][subject]
+        cache[action][subject]
+      else
+        granted, actions = check_permission(action, subject)
+        actions.each do |a|
+          cache[a] ||= {}
+          cache[a][subject] ||= granted
+        end
+
+        granted
       end
-      false
+    end
+
+    def check_permission(action, subject)
+      applicable_roles.each do |role|
+        permission = role.find_permission(action, subject)
+        return [permission.granted, permission.actions] if permission
+      end
+
+      [false, []]
     end
 
     def cannot?(*args)
@@ -54,5 +72,12 @@ module AccessGranted
       subject
     end
 
+    private
+
+    def applicable_roles
+      @applicable_roles ||= roles.select do |role|
+        role.applies_to?(user)
+      end
+    end
   end
 end
